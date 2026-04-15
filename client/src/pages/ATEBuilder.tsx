@@ -295,13 +295,15 @@ export default function ATEBuilder() {
                         Siguiente →
                       </Button>
                     )}
-                    <Button
-                      onClick={() => handleSavePhase(currentPhase)}
-                      disabled={isSaving}
-                      className="ml-auto bg-green-600"
-                    >
-                      {isSaving ? "Guardando..." : "💾 Guardar"}
-                    </Button>
+                    {currentPhase === 5 && (
+                      <Button
+                        onClick={() => handleSavePhase(currentPhase)}
+                        disabled={isSaving}
+                        className="ml-auto bg-green-600"
+                      >
+                        {isSaving ? "Guardando..." : "💾 Guardar"}
+                      </Button>
+                    )}
                   </div>
                 </div>
               )

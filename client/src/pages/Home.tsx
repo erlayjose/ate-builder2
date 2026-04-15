@@ -29,7 +29,7 @@ export default function Home() {
       <div className="bg-slate-900 text-white shadow-lg">
         <div className="max-w-4xl mx-auto p-6">
           <h1 className="text-3xl font-bold">🏫 ATE Builder</h1>
-          <p className="text-sm opacity-75 mt-1">Bienvenido/a Docente, {user?.name || "usuario"}</p>
+          <p className="text-sm opacity-75 mt-1">Bienvenido/a Docente</p>
         </div>
       </div>
       <div className="max-w-4xl mx-auto p-6">
