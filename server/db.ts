@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, ates, ATE, InsertATE } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,97 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// ATE queries
+export async function createATE(userId: number, data: Omit<InsertATE, 'userId'>): Promise<ATE | null> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create ATE: database not available");
+    return null;
+  }
+
+  try {
+    const result = await db.insert(ates).values({ ...data, userId } as InsertATE);
+    const ateId = result[0].insertId;
+    return await getATEById(ateId);
+  } catch (error) {
+    console.error("[Database] Failed to create ATE:", error);
+    throw error;
+  }
+}
+
+export async function getATEById(id: number): Promise<ATE | null> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get ATE: database not available");
+    return null;
+  }
+
+  try {
+    const result = await db.select().from(ates).where(eq(ates.id, id)).limit(1);
+    return result.length > 0 ? result[0] : null;
+  } catch (error) {
+    console.error("[Database] Failed to get ATE:", error);
+    throw error;
+  }
+}
+
+export async function updateATE(id: number, userId: number, data?: Record<string, any>): Promise<ATE | null> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot update ATE: database not available");
+    return null;
+  }
+
+  try {
+    // Verify ownership
+    const ate = await getATEById(id);
+    if (!ate || ate.userId !== userId) {
+      throw new Error("ATE not found or unauthorized");
+    }
+
+    if (data && Object.keys(data).length > 0) {
+      await db.update(ates).set(data as Partial<InsertATE>).where(eq(ates.id, id));
+    }
+    return await getATEById(id);
+  } catch (error) {
+    console.error("[Database] Failed to update ATE:", error);
+    throw error;
+  }
+}
+
+export async function listATEsByUser(userId: number): Promise<ATE[]> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot list ATEs: database not available");
+    return [];
+  }
+
+  try {
+    return await db.select().from(ates).where(eq(ates.userId, userId)).orderBy(ates.updatedAt);
+  } catch (error) {
+    console.error("[Database] Failed to list ATEs:", error);
+    throw error;
+  }
+}
+
+export async function deleteATE(id: number, userId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot delete ATE: database not available");
+    return false;
+  }
+
+  try {
+    // Verify ownership
+    const ate = await getATEById(id);
+    if (!ate || ate.userId !== userId) {
+      throw new Error("ATE not found or unauthorized");
+    }
+
+    await db.delete(ates).where(eq(ates.id, id));
+    return true;
+  } catch (error) {
+    console.error("[Database] Failed to delete ATE:", error);
+    throw error;
+  }
+}
