@@ -97,7 +97,9 @@ export async function createATE(userId: number, data: Omit<ATE, 'id' | 'userId' 
     ...data,
   });
 
-  return result;
+  const insertId = Number((result as any).insertId);
+  const createdATE = await getATEById(insertId, userId);
+  return createdATE;
 }
 
 export async function getATEById(id: number, userId: number) {

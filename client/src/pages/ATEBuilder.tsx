@@ -70,10 +70,10 @@ export default function ATEBuilder() {
           componente: ateData.componente,
           tipo: ateData.tipo,
         });
-        savedId = (result as any)?.id;
-        console.log("ATE creada con ID:", savedId);
+        savedId = (result as any)?.id || (result as any)?.insertId;
+        console.log("ATE creada con ID:", savedId, "Resultado:", result);
         if (savedId) {
-          setAteId(savedId);
+          setAteId(Number(savedId));
         }
       } else {
         await updateATEMutation.mutateAsync({
