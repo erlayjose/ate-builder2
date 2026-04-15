@@ -97,13 +97,9 @@ export const PHASES = [
   },
 ];
 
-export const COMPETENCIAS_PREDEFINIDAS = [
-  "Solución de problemas",
-  "Diseño tecnológico",
-  "Uso de herramientas",
-  "Pensamiento computacional",
-  "Innovación y creatividad",
-  "Trabajo colaborativo",
-  "Comunicación digital",
-  "Sostenibilidad",
+export const COMPONENTES_TECNOLOGICOS = [
+  "Naturaleza y Evolución de la T&I",
+  "Uso y apropiación de la T&I",
+  "Solución de problemas con T&I",
+  "Tecnología, Informática y Sociedad",
 ];

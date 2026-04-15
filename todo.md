@@ -64,6 +64,11 @@
 - [ ] Tests para exportación a PDF/TXT - OPCIONAL
 - [ ] Tests para navegación entre fases - OPCIONAL
 
+## Cambios Realizados
+- [x] Cambiar competencias por componentes tecnológicos (4 opciones)
+- [x] Eliminar exportación TXT
+- [x] Dejar solo exportación a PDF
+
 ## Bugs Reportados
 (Ninguno por el momento)
 

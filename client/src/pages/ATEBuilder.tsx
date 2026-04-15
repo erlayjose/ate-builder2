@@ -7,7 +7,7 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { trpc } from "@/lib/trpc";
 import { Loader2 } from "lucide-react";
-import { PHASES, COMPETENCIAS_PREDEFINIDAS } from "@/const/phases";
+import { PHASES, COMPONENTES_TECNOLOGICOS } from "@/const/phases";
 
 interface ATEData {
   teacherName: string;
@@ -121,36 +121,7 @@ export default function ATEBuilder() {
     }
   };
 
-  const handleExportTxt = () => {
-    let content = `ATE BUILDER - ACTIVIDAD TECNOLÓGICA ESCOLAR\n`;
-    content += `${Array(51).fill("=").join("")}\n\n`;
-    content += `Profesor/a: ${ateData.teacherName || "—"}\n`;
-    content += `Institución: ${ateData.institution || "—"}\n`;
-    content += `Nombre ATE: ${ateData.ateName || "—"}\n`;
-    content += `Grado: ${ateData.grade || "—"}\n`;
-    content += `Competencia: ${ateData.competencia || "—"}\n`;
-    content += `Tipo: ${ateData.tipo}\n\n`;
 
-    PHASES.forEach((phase) => {
-      content += `${Array(51).fill("=").join("")}\n`;
-      content += `FASE ${phase.number}: ${phase.title.toUpperCase()}\n`;
-      content += `${Array(51).fill("=").join("")}\n`;
-      phase.fields.forEach((f) => {
-        content += `\n${f.label}:\n${ateData[f.key] || "(sin completar)"}\n`;
-      });
-      content += "\n";
-    });
-
-    content += `\nGenerado con ATE Builder | ${new Date().toLocaleDateString("es-CO")}`;
-    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `ATE_${(ateData.ateName || "documento").replace(/\s/g, "_")}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("📄 Documento TXT exportado exitosamente");
-  };
 
   const phase = PHASES[currentPhase - 1];
   const progressPct = (savedPhases.size / 6) * 100;
@@ -169,9 +140,6 @@ export default function ATEBuilder() {
             <div className="flex gap-2">
               <Button onClick={handleExportPdf} className="bg-red-600 hover:bg-red-700">
                 ⬇ Exportar PDF
-              </Button>
-              <Button onClick={handleExportTxt} className="bg-green-600 hover:bg-green-700">
-                ⬇ Exportar TXT
               </Button>
               <Button onClick={() => setShowPreview(false)} variant="outline" className="text-white border-white">
                 ✕ Cerrar
@@ -251,11 +219,8 @@ export default function ATEBuilder() {
               <p className="text-sm opacity-75 mt-1">Constructor de Actividades Tecnológicas Escolares</p>
             </div>
             <div className="flex gap-2">
-              <Button onClick={() => setShowPreview(true)} className="bg-blue-600 hover:bg-blue-700">
+              <Button onClick={() => setShowPreview(true)} variant="default" className="bg-blue-600 hover:bg-blue-700">
                 👁 Vista Previa
-              </Button>
-              <Button onClick={handleExportTxt} className="bg-green-600 hover:bg-green-700">
-                ⬇ Exportar TXT
               </Button>
             </div>
           </div>
@@ -309,7 +274,7 @@ export default function ATEBuilder() {
                   className="w-full bg-white/10 border border-white/20 text-white rounded px-2 py-1 text-xs"
                 >
                   <option value="">Seleccionar...</option>
-                  {COMPETENCIAS_PREDEFINIDAS.map((comp) => (
+                  {COMPONENTES_TECNOLOGICOS.map((comp: string) => (
                     <option key={comp} value={comp} className="bg-slate-900">
                       {comp}
                     </option>
@@ -458,12 +423,9 @@ export default function ATEBuilder() {
         </Card>
 
         <div className="mt-6 flex justify-center gap-3">
-          <Button onClick={() => setShowPreview(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
-            👁 Ver Vista Previa Completa
-          </Button>
-          <Button onClick={handleExportTxt} className="bg-green-600 hover:bg-green-700 text-white">
-            📄 Exportar como TXT
-          </Button>
+              <Button onClick={() => setShowPreview(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
+                👁 Ver Vista Previa Completa
+              </Button>
         </div>
       </div>
     </div>
