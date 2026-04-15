@@ -220,7 +220,7 @@ export default function ATEBuilder() {
               </div>
             </div>
 
-            <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+            <div className="flex gap-2 mb-6 overflow-x-auto pb-2 items-center">
               {PHASES.map((phase) => (
                 <button
                   key={phase.id}
@@ -241,6 +241,11 @@ export default function ATEBuilder() {
                   {savedPhases.has(phase.id) ? "✅" : ""} Fase {phase.id}
                 </button>
               ))}
+              {ateId && completedCount === 5 && (
+                <Button onClick={handleExportPdf} className="bg-red-600 ml-auto">
+                  📥 Descargar PDF
+                </Button>
+              )}
             </div>
 
             {PHASES.map((phase) => (
@@ -311,14 +316,9 @@ export default function ATEBuilder() {
           <div className="bg-white rounded-lg shadow-lg p-8">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold">📄 Vista Previa</h2>
-              <div className="flex gap-2">
-                <Button onClick={handleExportPdf} className="bg-red-600">
-                  📥 PDF
-                </Button>
-                <Button onClick={() => setShowPreview(false)} variant="outline">
-                  Cerrar
-                </Button>
-              </div>
+              <Button onClick={() => setShowPreview(false)} variant="outline">
+                Cerrar
+              </Button>
             </div>
 
             <div ref={previewRef} className="bg-white p-8 border-2 border-gray-200 rounded-lg">
