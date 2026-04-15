@@ -69,7 +69,8 @@ export default function ATEBuilder() {
           componente: ateData.componente,
           tipo: ateData.tipo,
         });
-        setAteId((result as any)?.id || null);
+        const newId = (result as any)?.id;
+        if (newId) setAteId(newId);
       } else {
         await updateATEMutation.mutateAsync({
           id: ateId,
