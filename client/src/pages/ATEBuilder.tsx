@@ -310,7 +310,7 @@ export default function ATEBuilder() {
                         </Button>
                         <Button
                           onClick={handleExportPdf}
-                          disabled={!ateId || isSaving}
+                          disabled={isSaving}
                           className="bg-red-600"
                         >
                           📥 Descargar PDF
