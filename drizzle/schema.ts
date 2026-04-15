@@ -24,7 +24,7 @@ export const ates = mysqlTable("ates", {
   teacherName: varchar("teacherName", { length: 255 }).notNull(),
   institution: varchar("institution", { length: 255 }).notNull(),
   ateName: varchar("ateName", { length: 255 }).notNull(),
-  grade: varchar("grade", { length: 100 }).notNull(),
+  grade: varchar("grade", { length: 100 }),
   componente: varchar("componente", { length: 255 }).notNull(),
   tipo: varchar("tipo", { length: 100 }).notNull(),
   
@@ -32,32 +32,27 @@ export const ates = mysqlTable("ates", {
   situacionProblema: text("situacionProblema"),
   analisisEntorno: text("analisisEntorno"),
   vinculacionIntereses: text("vinculacionIntereses"),
-  fase1Completed: int("fase1Completed").default(0),
   
   // FASE 2: FUNDAMENTACIÓN
   objetivosAprendizaje: text("objetivosAprendizaje"),
   contenidosDisciplinares: text("contenidosDisciplinares"),
   articulacionCurriculo: text("articulacionCurriculo"),
-  fase2Completed: int("fase2Completed").default(0),
   
   // FASE 3: DISEÑO DIDÁCTICO
   secuenciacion: text("secuenciacion"),
-  estrategias: varchar("estrategias", { length: 255 }),
+  estrategias: text("estrategias"),
   rolesYTiempos: text("rolesYTiempos"),
-  fase3Completed: int("fase3Completed").default(0),
   
   // FASE 4: IMPLEMENTACIÓN
   ejecucion: text("ejecucion"),
   mediacionDocente: text("mediacionDocente"),
   acompanamiento: text("acompanamiento"),
-  fase4Completed: int("fase4Completed").default(0),
   
   // FASE 5: EVALUACIÓN
-  tipoEvaluacion: varchar("tipoEvaluacion", { length: 100 }),
+  tipoEvaluacion: text("tipoEvaluacion"),
   criteriosEvaluacion: text("criteriosEvaluacion"),
   instrumentosEvaluacion: text("instrumentosEvaluacion"),
   reflexionRetroalimentacion: text("reflexionRetroalimentacion"),
-  fase5Completed: int("fase5Completed").default(0),
   
   // Metadata
   createdAt: timestamp("createdAt").defaultNow().notNull(),
