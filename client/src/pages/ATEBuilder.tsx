@@ -45,7 +45,8 @@ export default function ATEBuilder() {
     setAteData((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSavePhase = async (phaseNum: number) => {
+  // Guardar TODAS las fases a la vez
+  const handleSaveAll = async () => {
     const headerErrors: string[] = [];
     if (!ateData.teacherName?.trim()) headerErrors.push("Profesor/a");
     if (!ateData.institution?.trim()) headerErrors.push("Institución");
@@ -57,23 +58,8 @@ export default function ATEBuilder() {
       return;
     }
 
-    const phase = PHASES[phaseNum - 1];
-    const missingFields = phase.fields.filter(
-      (f) => f.required && !ateData[f.key]?.trim()
-    );
-
-    if (missingFields.length > 0) {
-      toast.error(`Faltan: ${missingFields.map((f) => f.label).join(", ")}`);
-      return;
-    }
-
     setIsSaving(true);
     try {
-      const dataToSave = {
-        ...ateData,
-        [`fase${phaseNum}Completed`]: 1,
-      };
-
       if (!ateId) {
         const result = await createATEMutation.mutateAsync({
           teacherName: ateData.teacherName,
@@ -87,17 +73,32 @@ export default function ATEBuilder() {
       } else {
         await updateATEMutation.mutateAsync({
           id: ateId,
-          data: dataToSave,
+          data: ateData,
         });
       }
 
-      setSavedPhases((prev) => new Set(Array.from(prev).concat([phaseNum])));
-      toast.success(`✅ Fase ${phaseNum} guardada`);
+      // Marcar todas las fases como guardadas
+      setSavedPhases(new Set([1, 2, 3, 4, 5]));
+      toast.success("✅ ATE guardada completamente");
     } catch (error) {
       toast.error("Error al guardar");
       console.error(error);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  // Avanzar a siguiente fase y marcar actual como completada
+  const handleNextPhase = () => {
+    if (currentPhase < 5) {
+      setSavedPhases((prev) => new Set(Array.from(prev).concat([currentPhase])));
+      setCurrentPhase(currentPhase + 1);
+    }
+  };
+
+  const handlePrevPhase = () => {
+    if (currentPhase > 1) {
+      setCurrentPhase(currentPhase - 1);
     }
   };
 
@@ -121,17 +122,15 @@ export default function ATEBuilder() {
       }
       const blob = new Blob([bytes], { type: "application/pdf" });
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = result.filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `ATE_${ateData.ateName || "documento"}.pdf`;
+      a.click();
       window.URL.revokeObjectURL(url);
       
-      toast.success("✅ PDF descargado");
+      toast.success("PDF descargado");
     } catch (error) {
-      toast.error("Error al generar PDF");
+      toast.error("Error al exportar PDF");
       console.error(error);
     }
   };
@@ -143,17 +142,16 @@ export default function ATEBuilder() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
       <div className="bg-slate-900 text-white shadow-lg">
         <div className="max-w-6xl mx-auto p-6">
-          <div className="flex justify-between items-start mb-6">
-            <div>
-              <h1 className="text-3xl font-bold">🏫 ATE Builder</h1>
-              <p className="text-sm opacity-75 mt-1">Actividades Tecnológicas Escolares</p>
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold">🏫 ATE Builder</h1>
+            <div className="flex gap-2">
+              <Button onClick={() => setShowPreview(true)} className="bg-blue-600">
+                👁 Vista Previa
+              </Button>
             </div>
-            <Button onClick={() => setShowPreview(true)} className="bg-blue-600">
-              👁 Vista Previa
-            </Button>
           </div>
 
-          <div className="bg-slate-800 rounded-lg p-4">
+          <div className="bg-slate-800 rounded-lg p-4 mt-4">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-semibold">Progreso: {completedCount}/5</span>
               <span className="text-sm opacity-75">{Math.round(progressPercent)}%</span>
@@ -286,22 +284,22 @@ export default function ATEBuilder() {
 
                   <div className="mt-8 flex gap-4">
                     {currentPhase > 1 && (
-                      <Button onClick={() => setCurrentPhase(currentPhase - 1)} variant="outline">
+                      <Button onClick={handlePrevPhase} variant="outline">
                         ← Anterior
                       </Button>
                     )}
                     {currentPhase < 5 && (
-                      <Button onClick={() => setCurrentPhase(currentPhase + 1)} variant="outline">
+                      <Button onClick={handleNextPhase} variant="outline">
                         Siguiente →
                       </Button>
                     )}
                     {currentPhase === 5 && (
                       <Button
-                        onClick={() => handleSavePhase(currentPhase)}
+                        onClick={handleSaveAll}
                         disabled={isSaving}
                         className="ml-auto bg-green-600"
                       >
-                        {isSaving ? "Guardando..." : "💾 Guardar"}
+                        {isSaving ? "Guardando..." : "💾 Guardar ATE"}
                       </Button>
                     )}
                   </div>
