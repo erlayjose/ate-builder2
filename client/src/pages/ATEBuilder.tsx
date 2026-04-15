@@ -242,11 +242,7 @@ export default function ATEBuilder() {
                   {savedPhases.has(phase.id) ? "✅" : ""} Fase {phase.id}
                 </button>
               ))}
-              {savedPhases.size === 5 && (
-                <Button onClick={handleExportPdf} className="bg-red-600 ml-auto">
-                  📥 Descargar PDF
-                </Button>
-              )}
+
             </div>
 
             {PHASES.map((phase) => (
@@ -300,13 +296,22 @@ export default function ATEBuilder() {
                       </Button>
                     )}
                     {currentPhase === 5 && (
-                      <Button
-                        onClick={handleSaveAll}
-                        disabled={isSaving}
-                        className="ml-auto bg-green-600"
-                      >
-                        {isSaving ? "Guardando..." : "💾 Guardar ATE"}
-                      </Button>
+                      <div className="flex gap-2 ml-auto">
+                        <Button
+                          onClick={handleSaveAll}
+                          disabled={isSaving}
+                          className="bg-green-600"
+                        >
+                          {isSaving ? "Guardando..." : "💾 Guardar ATE"}
+                        </Button>
+                        <Button
+                          onClick={handleExportPdf}
+                          disabled={!ateId || isSaving}
+                          className="bg-red-600"
+                        >
+                          📥 Descargar PDF
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </div>
