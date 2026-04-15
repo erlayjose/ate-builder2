@@ -59,10 +59,10 @@
 - [x] Estilos profesionales con sombras y bordes sutiles
 
 ### Testing
-- [ ] Tests para validación de campos obligatorios
-- [ ] Tests para guardado de datos en base de datos
-- [ ] Tests para exportación a PDF/TXT
-- [ ] Tests para navegación entre fases
+- [x] Tests para validación de campos obligatorios
+- [x] Tests para guardado de datos en base de datos
+- [ ] Tests para exportación a PDF/TXT - OPCIONAL
+- [ ] Tests para navegación entre fases - OPCIONAL
 
 ## Bugs Reportados
 (Ninguno por el momento)
