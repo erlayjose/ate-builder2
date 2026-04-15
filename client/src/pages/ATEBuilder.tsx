@@ -3,8 +3,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import { PHASES, COMPONENTS } from "@/const/phases";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
+
 
 export default function ATEBuilder() {
   const [currentPhase, setCurrentPhase] = useState(1);
@@ -102,43 +101,34 @@ export default function ATEBuilder() {
     }
   };
 
+  const exportPdfMutation = trpc.ate.exportPdf.useMutation();
+
   const handleExportPdf = async () => {
-    if (!previewRef.current) {
-      toast.error("Abre la vista previa");
+    if (!ateId) {
+      toast.error("Guarda la ATE primero");
       return;
     }
 
     toast.loading("Generando PDF...");
     try {
-      const canvas = await html2canvas(previewRef.current, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-      });
-
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4",
-      });
-
-      const imgWidth = 210;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= 297;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= 297;
+      const result = await exportPdfMutation.mutateAsync({ id: ateId });
+      
+      // Convertir base64 a blob y descargar
+      const binaryString = atob(result.buffer);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
       }
-
-      pdf.save(`${ateData.ateName || "ATE"}.pdf`);
+      const blob = new Blob([bytes], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = result.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
       toast.success("✅ PDF descargado");
     } catch (error) {
       toast.error("Error al generar PDF");

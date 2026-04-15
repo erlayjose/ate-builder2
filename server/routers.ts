@@ -19,6 +19,22 @@ export const appRouter = router({
   }),
 
   ate: router({
+    exportPdf: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const ate = await getATEById(input.id, ctx.user.id);
+        if (!ate) {
+          throw new Error("ATE not found or unauthorized");
+        }
+
+        const { generateATEPdf } = await import("./pdf-generator");
+        const pdfBuffer = await generateATEPdf(ate as any);
+        return {
+          buffer: pdfBuffer.toString("base64"),
+          filename: `${ate.ateName || "ATE"}.pdf`,
+        };
+      }),
+
     create: protectedProcedure
       .input(
         z.object({
