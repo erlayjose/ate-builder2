@@ -60,6 +60,7 @@ export default function ATEBuilder() {
 
     setIsSaving(true);
     try {
+      let savedId = ateId;
       if (!ateId) {
         const result = await createATEMutation.mutateAsync({
           teacherName: ateData.teacherName,
@@ -69,8 +70,11 @@ export default function ATEBuilder() {
           componente: ateData.componente,
           tipo: ateData.tipo,
         });
-        const newId = (result as any)?.id;
-        if (newId) setAteId(newId);
+        savedId = (result as any)?.id;
+        console.log("ATE creada con ID:", savedId);
+        if (savedId) {
+          setAteId(savedId);
+        }
       } else {
         await updateATEMutation.mutateAsync({
           id: ateId,
