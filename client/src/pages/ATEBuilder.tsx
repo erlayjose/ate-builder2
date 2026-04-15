@@ -45,6 +45,18 @@ export default function ATEBuilder() {
   };
 
   const handleSavePhase = async (phaseNum: number) => {
+    // Validar campos obligatorios del encabezado
+    const headerErrors: string[] = [];
+    if (!ateData.teacherName?.trim()) headerErrors.push("Profesor/a");
+    if (!ateData.institution?.trim()) headerErrors.push("Institución");
+    if (!ateData.ateName?.trim()) headerErrors.push("Nombre ATE");
+    if (!ateData.competencia?.trim()) headerErrors.push("Componente");
+
+    if (headerErrors.length > 0) {
+      toast.error(`Completa los campos del encabezado: ${headerErrors.join(", ")}`);
+      return;
+    }
+
     const phase = PHASES[phaseNum - 1];
     const missingFields = phase.fields.filter(
       (f) => f.required && !ateData[f.key]?.trim()
@@ -52,7 +64,7 @@ export default function ATEBuilder() {
 
     if (missingFields.length > 0) {
       toast.error(
-        `Completa los campos obligatorios: ${missingFields.map((f) => f.label).join(", ")}`
+        `Completa los campos obligatorios de la fase: ${missingFields.map((f) => f.label).join(", ")}`
       );
       return;
     }
