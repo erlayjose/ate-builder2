@@ -97,8 +97,11 @@ export async function createATE(userId: number, data: Omit<ATE, 'id' | 'userId' 
     ...data,
   });
 
-  const insertId = Number((result as any).insertId);
-  const createdATE = await getATEById(insertId, userId);
+  const insertId = (result as any)?.insertId || (result as any)?.lastID;
+  if (!insertId || isNaN(Number(insertId))) {
+    throw new Error("Failed to get insert ID from database");
+  }
+  const createdATE = await getATEById(Number(insertId), userId);
   return createdATE;
 }
 
