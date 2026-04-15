@@ -242,7 +242,7 @@ export default function ATEBuilder() {
                   {savedPhases.has(phase.id) ? "✅" : ""} Fase {phase.id}
                 </button>
               ))}
-              {ateId && completedCount === 5 && (
+              {savedPhases.size === 5 && (
                 <Button onClick={handleExportPdf} className="bg-red-600 ml-auto">
                   📥 Descargar PDF
                 </Button>
