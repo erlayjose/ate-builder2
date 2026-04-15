@@ -1,11 +1,10 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, ates, ATE, InsertATE } from "../drizzle/schema";
+import { InsertUser, users, ates, type ATE } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
-// Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
@@ -85,101 +84,61 @@ export async function getUserByOpenId(openId: string) {
   }
 
   const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
-
   return result.length > 0 ? result[0] : undefined;
 }
 
-// ATE queries
-export async function createATE(userId: number, data: Omit<InsertATE, 'userId'>): Promise<ATE | null> {
+// ATE Functions
+export async function createATE(userId: number, data: Omit<ATE, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) {
   const db = await getDb();
-  if (!db) {
-    console.warn("[Database] Cannot create ATE: database not available");
-    return null;
-  }
+  if (!db) throw new Error("Database not available");
 
-  try {
-    const result = await db.insert(ates).values({ ...data, userId } as InsertATE);
-    const ateId = result[0].insertId;
-    return await getATEById(ateId);
-  } catch (error) {
-    console.error("[Database] Failed to create ATE:", error);
-    throw error;
-  }
+  const result = await db.insert(ates).values({
+    userId,
+    ...data,
+  });
+
+  return result;
 }
 
-export async function getATEById(id: number): Promise<ATE | null> {
+export async function getATEById(id: number, userId: number) {
   const db = await getDb();
-  if (!db) {
-    console.warn("[Database] Cannot get ATE: database not available");
-    return null;
-  }
+  if (!db) throw new Error("Database not available");
 
-  try {
-    const result = await db.select().from(ates).where(eq(ates.id, id)).limit(1);
-    return result.length > 0 ? result[0] : null;
-  } catch (error) {
-    console.error("[Database] Failed to get ATE:", error);
-    throw error;
-  }
+  const result = await db
+    .select()
+    .from(ates)
+    .where(eq(ates.id, id))
+    .limit(1);
+
+  if (result.length === 0) return null;
+  if (result[0].userId !== userId) throw new Error("Unauthorized");
+  return result[0];
 }
 
-export async function updateATE(id: number, userId: number, data?: Record<string, any>): Promise<ATE | null> {
+export async function updateATE(id: number, userId: number, data: Partial<ATE>) {
   const db = await getDb();
-  if (!db) {
-    console.warn("[Database] Cannot update ATE: database not available");
-    return null;
-  }
+  if (!db) throw new Error("Database not available");
 
-  try {
-    // Verify ownership
-    const ate = await getATEById(id);
-    if (!ate || ate.userId !== userId) {
-      throw new Error("ATE not found or unauthorized");
-    }
+  const existing = await getATEById(id, userId);
+  if (!existing) throw new Error("ATE not found");
 
-    if (data && Object.keys(data).length > 0) {
-      await db.update(ates).set(data as Partial<InsertATE>).where(eq(ates.id, id));
-    }
-    return await getATEById(id);
-  } catch (error) {
-    console.error("[Database] Failed to update ATE:", error);
-    throw error;
-  }
+  await db.update(ates).set(data).where(eq(ates.id, id));
+  return await getATEById(id, userId);
 }
 
-export async function listATEsByUser(userId: number): Promise<ATE[]> {
+export async function listATEsByUser(userId: number) {
   const db = await getDb();
-  if (!db) {
-    console.warn("[Database] Cannot list ATEs: database not available");
-    return [];
-  }
+  if (!db) throw new Error("Database not available");
 
-  try {
-    return await db.select().from(ates).where(eq(ates.userId, userId)).orderBy(ates.updatedAt);
-  } catch (error) {
-    console.error("[Database] Failed to list ATEs:", error);
-    throw error;
-  }
+  return await db.select().from(ates).where(eq(ates.userId, userId));
 }
 
-export async function deleteATE(id: number, userId: number): Promise<boolean> {
+export async function deleteATE(id: number, userId: number) {
   const db = await getDb();
-  if (!db) {
-    console.warn("[Database] Cannot delete ATE: database not available");
-    return false;
-  }
+  if (!db) throw new Error("Database not available");
 
-  try {
-    // Verify ownership
-    const ate = await getATEById(id);
-    if (!ate || ate.userId !== userId) {
-      throw new Error("ATE not found or unauthorized");
-    }
+  const existing = await getATEById(id, userId);
+  if (!existing) throw new Error("ATE not found");
 
-    await db.delete(ates).where(eq(ates.id, id));
-    return true;
-  } catch (error) {
-    console.error("[Database] Failed to delete ATE:", error);
-    throw error;
-  }
+  await db.delete(ates).where(eq(ates.id, id));
 }

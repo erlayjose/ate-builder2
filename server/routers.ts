@@ -6,7 +6,6 @@ import { createATE, getATEById, updateATE, listATEsByUser, deleteATE } from "./d
 import { z } from "zod";
 
 export const appRouter = router({
-    // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
@@ -27,8 +26,8 @@ export const appRouter = router({
           institution: z.string().min(1),
           ateName: z.string().min(1),
           grade: z.string().optional(),
-          competencia: z.string().optional(),
-          tipo: z.enum(["producto", "proceso", "sistema"]).default("producto"),
+          componente: z.string().optional(),
+          tipo: z.string().default("Producto"),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -36,9 +35,30 @@ export const appRouter = router({
           teacherName: input.teacherName,
           institution: input.institution,
           ateName: input.ateName,
-          grade: input.grade || null,
-          competencia: input.competencia || null,
+          grade: input.grade || "",
+          componente: input.componente || "",
           tipo: input.tipo,
+          situacionProblema: "",
+          analisisEntorno: "",
+          vinculacionIntereses: "",
+          objetivosAprendizaje: "",
+          contenidosDisciplinares: "",
+          articulacionCurriculo: "",
+          secuenciacion: "",
+          estrategias: "",
+          rolesYTiempos: "",
+          ejecucion: "",
+          mediacionDocente: "",
+          acompanamiento: "",
+          tipoEvaluacion: "",
+          criteriosEvaluacion: "",
+          instrumentosEvaluacion: "",
+          reflexionRetroalimentacion: "",
+          fase1Completed: 0,
+          fase2Completed: 0,
+          fase3Completed: 0,
+          fase4Completed: 0,
+          fase5Completed: 0,
         };
         return await createATE(ctx.user.id, ateData);
       }),
@@ -46,8 +66,8 @@ export const appRouter = router({
     get: protectedProcedure
       .input(z.object({ id: z.number() }))
       .query(async ({ ctx, input }) => {
-        const ate = await getATEById(input.id);
-        if (!ate || ate.userId !== ctx.user.id) {
+        const ate = await getATEById(input.id, ctx.user.id);
+        if (!ate) {
           throw new Error("ATE not found or unauthorized");
         }
         return ate;
@@ -61,11 +81,11 @@ export const appRouter = router({
       .input(
         z.object({
           id: z.number(),
-          data: z.record(z.string(), z.any()).optional(),
+          data: z.record(z.string(), z.any()),
         })
       )
       .mutation(async ({ ctx, input }) => {
-        return await updateATE(input.id, ctx.user.id, input.data);
+        return await updateATE(input.id, ctx.user.id, input.data as any);
       }),
 
     delete: protectedProcedure
